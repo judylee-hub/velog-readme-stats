@@ -5,7 +5,7 @@ on:
     branches:
       - main
   schedule:
-    - cron: "0 0 * * *" # 매일 자정에 실행
+    - cron: "0 0 * * *" # 매일 자정
 
 jobs:
   update_blog:
@@ -33,13 +33,24 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-      - name: Run script
-        run: python scripts/update_blog.py || { echo 'Script failed'; exit 1; }
+      - name: Show Current Directory
+        run: pwd
+
+      - name: List files in Current Directory
+        run: ls -la
+
+      - name: Run script with debug
+        run: python scripts/update_blog.py
+        continue-on-error: true # 오류가 발생해도 다음 단계로 진행하기 위해 추가합니다.
+
+      - name: Check if changes exist
+        run: git status
 
       - name: Commit changes
         run: |
           git add .
-          git diff-index --quiet HEAD || git commit -m "Update blog posts"
+          git commit -m "Update blog posts"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+        continue-on-error: true # 오류가 발생해도 다음 단계로 진행하기 위해 추가합니다.
