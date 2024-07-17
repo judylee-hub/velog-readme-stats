@@ -16,12 +16,12 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2 # actions/setup-node 버전 업데이트
+        uses: actions/setup-node@v3
         with:
-          node-version: "16" # Node.js 버전을 16으로 변경
+          node-version: "20"
 
       - name: Set up Python
-        uses: actions/setup-python@v3 # actions/setup-python 버전 업데이트
+        uses: actions/setup-python@v3
         with:
           python-version: "3.x"
 
@@ -35,7 +35,7 @@ jobs:
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
       - name: Run script
-        run: python scripts/update_blog.py
+ run: python scripts/update_blog.py
 
       - name: Commit changes
         run: |
