@@ -3,16 +3,16 @@ name: Update Blog Posts
 on:
   push:
     branches:
-      - main # 또는 워크플로우를 트리거하고 싶은 브랜치 이름
+      - main
   schedule:
-    - cron: "0 0 * * *" # 매일 자정에 실행
+    - cron: "0 0 * * *" # 매일 자정
 
 jobs:
   update_blog:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Check out the repository
         uses: actions/checkout@v3
 
       - name: Set up Node.js
@@ -20,20 +20,37 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Push changes
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git push https://${{ secrets.GH_PAT }}@github.com/judylee-hub/velog-readme-stats.git
-
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: "3.x"
 
       - name: Install dependencies
-        run: |
-          pip install feedparser gitpython
+        run: pip install feedparser gitpython
 
-      - name: Run script
+      - name: Configure Git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - name: Show Current Directory
+        run: pwd
+
+      - name: List files in Current Directory
+        run: ls -la
+
+      - name: Run script with debug
         run: python scripts/update_blog.py
+        continue-on-error: true # 오류가 발생해도 다음 단계로 진행하기 위해 추가합니다.
+
+      - name: Check if changes exist
+        run: git status
+
+      - name: Commit changes
+        run: |
+          git add .
+          git commit -m "Update blog posts"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+        continue-on-error: true # 오류가 발생해도 다음 단계로 진행하기 위해 추가합니다.
